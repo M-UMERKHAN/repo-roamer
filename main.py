@@ -23,6 +23,10 @@ def list_files(directory: str=".")->str:
                 rel_path=os.path.relpath(os.path.join(root, file), directory)
                 file_list.append(rel_path)
         return "\n".join(file_list) if file_list else "No files found."
+    except FileNotFoundError:
+        return f"error: directory '{directory}' does not exist."
+    except PermissionError:
+        return f"error: permission denied to access directory '{directory}'."
     except Exception as e:
         return f"error: {str(e)}"
     
@@ -34,6 +38,12 @@ def read_file(file_path: str)->str:
             return f"error: file '{file_path}' does not exist."
         with open(file_path, 'r', encoding="utf-8") as f:
             return f.read()
+    except FileNotFoundError:
+        return f"error: file '{file_path}' does not exist."
+    except PermissionError:
+        return f"error: permission denied to read file '{file_path}'."
+    except UnicodeDecodeError:
+        return f"error: unable to decode file '{file_path}' with utf-8 encoding."
     except Exception as e:
         return f"error: {str(e)}"
     
@@ -72,7 +82,7 @@ if __name__=="__main__":
         print("\n Roamer is thinking...")
         try:
             response=agent.invoke(
-                {"input":user_input},
+                {"messages": [{"role": "user", "content": user_input}]},
                 context=AgentContext(user_role="Senior Engineer")
             )
 
